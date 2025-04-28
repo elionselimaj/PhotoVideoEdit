@@ -1,0 +1,57 @@
+export const lightTheme = {
+  colors: {
+    primary: '#2196F3',
+    secondary: '#4CAF50',
+    accent: '#FF9800',
+    background: '#F5F5F5',
+    surface: '#FFFFFF',
+    text: '#212121',
+    textLight: '#757575',
+    disabled: '#CCCCCC',
+    error: '#F44336',
+    success: '#4CAF50',
+    info: '#E3F2FD',
+  },
+  spacing: {
+    xs: '4px',
+    sm: '8px',
+    md: '16px',
+    lg: '24px',
+    xl: '32px',
+  },
+  borderRadius: {
+    sm: '4px',
+    md: '8px',
+    lg: '12px',
+  },
+  fontSizes: {
+    xs: '12px',
+    sm: '14px',
+    md: '16px',
+    lg: '18px',
+    xl: '24px',
+  },
+  shadows: {
+    sm: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+      elevation: 1,
+    },
+    md: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    lg: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+  },
+};
