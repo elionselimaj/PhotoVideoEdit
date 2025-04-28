@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Alert } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { createThumbnail } from 'react-native-create-thumbnail';
-import { Camera } from 'react-native-vision-camera';
+// import { Camera } from 'react-native-vision-camera';
 import { CapturedMedia, MediaFile } from '@/types';
 import usePermissions from '@/hooks/usePermissions';
 
@@ -102,31 +102,31 @@ export const useMediaPicker = (): MediaPickerState => {
   const openCamera = async (): Promise<void> => {
     await checkPermissions();
 
-    const cameraPermission = await Camera.getCameraPermissionStatus();
-    const microphonePermission = await Camera.getMicrophonePermissionStatus();
+    // const cameraPermission = await Camera.getCameraPermissionStatus();
+    // const microphonePermission = await Camera.getMicrophonePermissionStatus();
 
-    if (cameraPermission !== 'granted') {
-      const newCameraPermission = await Camera.requestCameraPermission();
-      if (newCameraPermission !== 'granted') {
-        Alert.alert(
-          'Permission Required',
-          'Camera permission is required to capture media',
-        );
-        return;
-      }
-    }
-
-    if (microphonePermission !== 'granted') {
-      const newMicrophonePermission =
-        await Camera.requestMicrophonePermission();
-      if (newMicrophonePermission !== 'granted') {
-        Alert.alert(
-          'Permission Required',
-          'Microphone permission is required to record video',
-        );
-        return;
-      }
-    }
+    // if (cameraPermission !== 'granted') {
+    //   const newCameraPermission = await Camera.requestCameraPermission();
+    //   if (newCameraPermission !== 'granted') {
+    //     Alert.alert(
+    //       'Permission Required',
+    //       'Camera permission is required to capture media',
+    //     );
+    //     return;
+    //   }
+    // }
+    //
+    // if (microphonePermission !== 'granted') {
+    //   const newMicrophonePermission =
+    //     await Camera.requestMicrophonePermission();
+    //   if (newMicrophonePermission !== 'granted') {
+    //     Alert.alert(
+    //       'Permission Required',
+    //       'Microphone permission is required to record video',
+    //     );
+    //     return;
+    //   }
+    // }
 
     setIsCameraActive(true);
   };

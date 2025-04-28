@@ -5,22 +5,59 @@ import styled from 'styled-components/native';
 import { Platform } from 'react-native';
 import { useMediaPicker } from '@/hooks';
 import { MediaPreview } from './components';
+import useMediaProcessor from '@/hooks/useMediaProcessor';
 
 export const MediaProcessorScreen: React.FC = () => {
   const {
     mediaFile,
     isLoading: isLoadingMedia,
     pickFromGallery,
+    openCamera,
+    resetMedia,
   } = useMediaPicker();
+
+  const {
+    isProcessing,
+    processedMedia,
+    processingOptions,
+    setCompressionQuality,
+    toggleCropMode,
+    processMedia,
+    saveToGallery,
+    reset,
+  } = useMediaProcessor();
+
+  const handleProcess = async () => {
+    if (mediaFile) {
+      await processMedia(mediaFile);
+    }
+  };
+
+  const handleReset = () => {
+    reset();
+    resetMedia();
+  };
+
+  const isProcessingEnabled = mediaFile && !isProcessing;
+
   return (
     <Container>
       <Column p={16}>
         <Spacer height={theme.spacing.md} />
         <Card>
           <SectionTitle>Select Media</SectionTitle>
-          <Row>
-            <Button onPress={pickFromGallery} disabled={isLoadingMedia}>
+          <Row justifySpaceBetween>
+            <Button
+              onPress={pickFromGallery}
+              disabled={isLoadingMedia || isProcessing}
+            >
               From Gallery
+            </Button>
+            <Button
+              onPress={openCamera}
+              disabled={isLoadingMedia || isProcessing}
+            >
+              Take New
             </Button>
           </Row>
         </Card>
