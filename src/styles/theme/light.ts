@@ -4,7 +4,7 @@ export const lightTheme = {
     secondary: '#4CAF50',
     accent: '#FF9800',
     background: '#F5F5F5',
-    surface: '#FFFFFF',
+    white: '#FFFFFF',
     text: '#212121',
     textLight: '#757575',
     disabled: '#CCCCCC',
@@ -52,6 +52,13 @@ export const lightTheme = {
       shadowOpacity: 0.1,
       shadowRadius: 8,
       elevation: 4,
+    },
+  },
+  text: {
+    title: {
+      fontSize: '24px',
+      fontWeight: 'bold',
+      color: '#212121',
     },
   },
 };

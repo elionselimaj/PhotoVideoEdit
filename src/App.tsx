@@ -1,7 +1,7 @@
 import React from 'react';
 import { SafeAreaView, StatusBar } from 'react-native';
 import styled from 'styled-components/native';
-import { theme } from '@styles/theme';
+import { theme } from '@/styles';
 
 const SafeArea = styled(SafeAreaView)`
   flex: 1;

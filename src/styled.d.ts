@@ -66,3 +66,17 @@ export interface Shadows {
   md: ShadowStyle;
   lg: ShadowStyle;
 }
+
+export interface Typeface {
+  fontFamily: string;
+  fontSize: number;
+  lineHeight?: number;
+  textDecorationLine?: 'underline' | 'line-through';
+  textDecorationStyle?: 'solid';
+  fontWeight?: string;
+  color?: string;
+}
+
+export interface Typefaces {
+  title: Typeface;
+}
