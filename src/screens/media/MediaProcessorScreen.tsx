@@ -1,11 +1,12 @@
 import React from 'react';
-import { Button, Column, Container, Row, Spacer, Text } from '@/components';
+import { Button, Column, Row, Spacer, Text } from '@/components';
 import { theme } from '@/styles';
 import styled from 'styled-components/native';
-import { Platform } from 'react-native';
+import { Platform, ScrollView } from 'react-native';
 import { useMediaPicker } from '@/hooks';
-import { MediaPreview } from './components';
+import { MediaPreview, QualitySlider } from './components';
 import useMediaProcessor from '@/hooks/useMediaProcessor';
+import { StatsDisplay } from '@/screens/media/components/StatsDisplay';
 
 export const MediaProcessorScreen: React.FC = () => {
   const {
@@ -41,7 +42,7 @@ export const MediaProcessorScreen: React.FC = () => {
   const isProcessingEnabled = mediaFile && !isProcessing;
 
   return (
-    <Container>
+    <Scroll>
       <Column p={16}>
         <Spacer height={theme.spacing.md} />
         <Card>
@@ -71,12 +72,67 @@ export const MediaProcessorScreen: React.FC = () => {
               thumbnailUri={mediaFile.thumbnailUri}
               isLoading={isLoadingMedia}
             />
+
+            <Spacer height={theme.spacing.sm} />
+            <SectionTitle>Processing Options</SectionTitle>
+            <QualitySlider
+              value={processingOptions.compressionQuality}
+              onValueChange={setCompressionQuality}
+            />
+            <Button
+              onPress={toggleCropMode}
+              variant={processingOptions.enableCrop ? 'accent' : 'primary'}
+              size="small"
+            >
+              {processingOptions.enableCrop ? 'Disable Crop' : 'Enable Crop'}
+            </Button>
+
+            <Spacer height={theme.spacing.sm} />
+            <Button
+              onPress={handleProcess}
+              variant="secondary"
+              disabled={!isProcessingEnabled}
+              loading={isProcessing}
+              fullWidth
+            >
+              Process Media
+            </Button>
           </Card>
-        ) : null}
+        ) : (
+          <Card>
+            <Text>Please select or capture media to get started</Text>
+          </Card>
+        )}
+
+        {processedMedia && (
+          <Card>
+            <SectionTitle>Processed Media</SectionTitle>
+            <MediaPreview
+              uri={processedMedia.processedUri}
+              type={processedMedia.type}
+              showControls={true}
+            />
+
+            <StatsDisplay stats={processedMedia.stats} />
+
+            {/* Save & Reset Buttons */}
+            <Row justifySpaceBetween>
+              <Button onPress={saveToGallery} variant="accent">
+                Save to Gallery
+              </Button>
+              <Button onPress={handleReset}>Reset</Button>
+            </Row>
+          </Card>
+        )}
       </Column>
-    </Container>
+    </Scroll>
   );
 };
+
+const Scroll = styled(ScrollView)`
+  flex: 1;
+  background-color: ${theme.colors.background};
+`;
 
 const Card = styled.View`
   background-color: ${theme.colors.white};

@@ -4,7 +4,7 @@ import ImagePicker from 'react-native-image-crop-picker';
 import { CropDimensions, ProcessingStats } from '@/types';
 import { formatFileSize, calculateReduction } from '@/utils';
 
-interface ImageProcessingOptions {
+interface ImageProcessingOptionsProps {
   compressionQuality: number;
   cropDimensions?: CropDimensions;
   enableCrop: boolean;
@@ -19,7 +19,7 @@ interface ImageProcessingOptions {
  */
 export const processImage = async (
   uri: string,
-  options: ImageProcessingOptions,
+  options: ImageProcessingOptionsProps,
 ): Promise<{ processedUri: string; stats: ProcessingStats }> => {
   try {
     // Get original file info
