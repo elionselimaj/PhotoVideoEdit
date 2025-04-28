@@ -9,7 +9,7 @@
     "clean-pods": "cd ios && pod deintegrate && pod install",
     "ios": "npx react-native run-ios",
     "ios13": "npx react-native run-ios --simulator=\"iPhone 13\"",
-    "device": "npx react-native run-ios --device=\"iPhone (9)\"",
+    "device": "npx react-native run-ios --device=\"iPhone El\"",
     "lint": "eslint .",
     "start": "npx react-native start --reset-cache",
     "list-android-devices": "npx react-native run-android --list-devices",
@@ -18,11 +18,17 @@
     "prettier": "prettier -c \"src/**/*.ts\""
   },
   "dependencies": {
+    "@react-native-camera-roll/camera-roll": "^7.10.0",
     "react": "18.3.1",
     "react-native": "0.76.9",
-    "styled-components": "^6.1.8",
+    "react-native-create-thumbnail": "^2.1.1",
+    "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "^2.18.1",
-    "react-native-haptic-feedback": "^2.2.0"
+    "react-native-haptic-feedback": "^2.2.0",
+    "react-native-image-picker": "^8.2.0",
+    "react-native-permissions": "^5.4.0",
+    "react-native-vision-camera": "^4.6.4",
+    "styled-components": "^6.1.8"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

@@ -2,11 +2,11 @@ import { FC } from 'react';
 import styled from 'styled-components/native';
 
 type SpacerProps = {
-  height?: number;
-  width?: number;
+  height?: string;
+  width?: string;
 };
 
 export const Spacer: FC<SpacerProps> = styled.View<SpacerProps>`
-  ${({ height }: { height: number }) => height && `height: ${height}px`}
-  ${({ width }: { width: number }) => width && `width: ${width}px`}
+  ${({ height }: { height: string }) => height && `height: ${height}px`}
+  ${({ width }: { width: string }) => width && `width: ${width}px`}
 `;
