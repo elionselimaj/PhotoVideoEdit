@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { ComponentType, ReactNode } from 'react';
 import {
   Pressable,
@@ -6,7 +5,7 @@ import {
   TouchableOpacity,
   TouchableOpacityProps,
 } from 'react-native';
-import { vibrate } from '@utils/device';
+import { vibrate } from '@/utils';
 
 const withVibration =
   // prettier-ignore
