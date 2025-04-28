@@ -10,9 +10,9 @@ module.exports = {
       'module-resolver',
       {
         alias: {
-          '@styles': './styles/api',
+          '@': './src',
         },
       },
-    ]
+    ],
   ],
 };

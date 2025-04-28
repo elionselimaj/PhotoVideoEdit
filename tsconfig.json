@@ -29,7 +29,7 @@
       }
     ],
     "paths": {
-      "@styles/*": ["src/styles/*"],
+      "@/*": ["./src/*"]
     },
     "jsx": "react",
     "strict": false,
