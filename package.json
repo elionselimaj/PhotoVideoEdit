@@ -27,7 +27,10 @@
     "react-native-haptic-feedback": "^2.2.0",
     "react-native-image-picker": "^8.2.0",
     "react-native-permissions": "^5.4.0",
+    "react-native-video": "^6.13.0",
     "react-native-vision-camera": "^4.6.4",
+    "react-native-reanimated": "^3.7.2",
+    "lottie-react-native": "^6.7.2",
     "styled-components": "^6.1.8"
   },
   "devDependencies": {

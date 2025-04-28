@@ -4,9 +4,14 @@ import { theme } from '@/styles';
 import styled from 'styled-components/native';
 import { Platform } from 'react-native';
 import { useMediaPicker } from '@/hooks';
+import { MediaPreview } from './components';
 
 export const MediaProcessorScreen: React.FC = () => {
-  const { isLoading: isLoadingMedia, pickFromGallery } = useMediaPicker();
+  const {
+    mediaFile,
+    isLoading: isLoadingMedia,
+    pickFromGallery,
+  } = useMediaPicker();
   return (
     <Container>
       <Column p={16}>
@@ -19,6 +24,18 @@ export const MediaProcessorScreen: React.FC = () => {
             </Button>
           </Row>
         </Card>
+
+        {mediaFile ? (
+          <Card>
+            <SectionTitle>Processed Media</SectionTitle>
+            <MediaPreview
+              uri={mediaFile.uri}
+              type={mediaFile.type}
+              thumbnailUri={mediaFile.thumbnailUri}
+              isLoading={isLoadingMedia}
+            />
+          </Card>
+        ) : null}
       </Column>
     </Container>
   );
