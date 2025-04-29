@@ -7,6 +7,6 @@ type SpacerProps = {
 };
 
 export const Spacer: FC<SpacerProps> = styled.View<SpacerProps>`
-  ${({ height }: { height: string }) => height && `height: ${height}px`}
-  ${({ width }: { width: string }) => width && `width: ${width}px`}
+  ${({ height }: { height: string }) => height && `height: ${height}`}
+  ${({ width }: { width: string }) => width && `width: ${width}`}
 `;
