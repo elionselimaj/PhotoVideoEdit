@@ -2,4 +2,4 @@ export * from './processors';
 export * from './device';
 export * from './fileUtils';
 export * from './ui';
-export * from './videoProcessing';
+export * from './mediaUtils';

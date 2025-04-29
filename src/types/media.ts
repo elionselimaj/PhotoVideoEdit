@@ -1,49 +1,59 @@
-export type MediaType = 'image' | 'video' | null;
+// Media types and interfaces for the application
 
+// Type of media (now focusing only on images)
+export type MediaType = 'image' | 'video';
+
+// Media file information
 export interface MediaFile {
   uri: string;
   type: MediaType;
-  name?: string;
+  name: string;
   size?: number;
   thumbnailUri?: string;
-  width?: number;
-  height?: number;
-  duration?: number; // For videos
-}
-
-export interface CapturedMedia {
-  uri: string;
-  type: 'image' | 'video';
-  width?: number;
-  height?: number;
-  duration?: number; // For videos
-  size?: number;
-  codec?: string; // For videos
 }
 
 export interface ProcessingStats {
   originalSize: string;
   newSize: string;
   percentageReduction: string;
+  originalFormat: string;
+  newFormat: string;
+  originalDimensions?: {
+    width: number;
+    height: number;
+  };
+  newDimensions?: {
+    width: number;
+    height: number;
+  };
 }
 
-export interface CropDimensions {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
-export interface ProcessingOptions {
-  compressionQuality: number;
-  cropDimensions?: CropDimensions;
-  enableCrop: boolean;
-  targetFormat?: 'jpg' | 'png' | 'mp4' | 'mov' | 'webm';
-}
-
+// Processed media result
 export interface ProcessedMedia {
   originalUri: string;
   processedUri: string;
   stats: ProcessingStats;
   type: MediaType;
+}
+
+// Captured media from camera
+export interface CapturedMedia {
+  uri: string;
+  type: MediaType;
+  size?: number;
+}
+
+// Dimensions for cropping
+export interface CropDimensions {
+  offsetX: number;
+  offsetY: number;
+  width: number;
+  height: number;
+}
+
+// Processing options
+export interface ProcessingOptions {
+  compressionQuality: number;
+  enableCrop: boolean;
+  cropDimensions: CropDimensions;
 }

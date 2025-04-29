@@ -1,2 +1,1 @@
-export * from './imageProcessing';
-export * from './videoCropProcessor';
+export * from './useMediaProcessor';

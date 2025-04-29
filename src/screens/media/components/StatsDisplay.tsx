@@ -21,6 +21,7 @@ export const StatsDisplay: React.FC<StatsDisplayProps> = ({
     <StatsContainer>
       <StatsTitle>{title}</StatsTitle>
 
+      <SectionTitle>File Size</SectionTitle>
       <StatsRow>
         <StatsLabel>Original Size</StatsLabel>
         <StatsValue>{stats.originalSize}</StatsValue>
@@ -37,6 +38,36 @@ export const StatsDisplay: React.FC<StatsDisplayProps> = ({
           {stats.percentageReduction}
         </ReductionText>
       </StatsRow>
+
+      <SectionTitle>Format</SectionTitle>
+      <StatsRow>
+        <StatsLabel>Original Format</StatsLabel>
+        <StatsValue>{stats.originalFormat?.toUpperCase()}</StatsValue>
+      </StatsRow>
+
+      <StatsRow>
+        <StatsLabel>New Format</StatsLabel>
+        <StatsValue>{stats.newFormat?.toUpperCase()}</StatsValue>
+      </StatsRow>
+
+      {stats.originalDimensions && stats.newDimensions && (
+        <>
+          <SectionTitle>Dimensions</SectionTitle>
+          <StatsRow>
+            <StatsLabel>Original</StatsLabel>
+            <StatsValue>
+              {stats.originalDimensions.width} ×{' '}
+              {stats.originalDimensions.height}
+            </StatsValue>
+          </StatsRow>
+          <StatsRow>
+            <StatsLabel>New</StatsLabel>
+            <StatsValue>
+              {stats.newDimensions.width} × {stats.newDimensions.height}
+            </StatsValue>
+          </StatsRow>
+        </>
+      )}
     </StatsContainer>
   );
 };
@@ -53,6 +84,14 @@ const StatsTitle = styled.Text`
   font-weight: bold;
   margin-bottom: ${theme.spacing.sm};
   color: ${theme.colors.text};
+`;
+
+const SectionTitle = styled.Text`
+  font-size: ${theme.fontSizes.sm};
+  font-weight: bold;
+  margin-top: ${theme.spacing.sm};
+  margin-bottom: ${theme.spacing.xs};
+  color: ${theme.colors.textLight};
 `;
 
 const StatsRow = styled.View`

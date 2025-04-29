@@ -11,6 +11,8 @@ interface QualitySliderProps {
   minimumValue?: number;
   maximumValue?: number;
   label?: string;
+  disabled?: boolean;
+  mediaType?: 'image' | 'video';
 }
 
 export const QualitySlider: React.FC<QualitySliderProps> = ({
@@ -19,17 +21,41 @@ export const QualitySlider: React.FC<QualitySliderProps> = ({
   step = 0.1,
   minimumValue = 0.1,
   maximumValue = 1.0,
-  label = 'Compression Quality',
+  label,
+  disabled = false,
+  mediaType = 'image',
 }) => {
+  // Default label based on media type
+  const defaultLabel =
+    mediaType === 'image'
+      ? 'Image Compression Quality'
+      : 'Video Compression Quality';
+
+  const sliderLabel = label || defaultLabel;
+
   const getQualityDescription = (quality: number): string => {
-    if (quality > 0.8) return 'High Quality (Larger File)';
-    if (quality > 0.5) return 'Medium Quality';
-    return 'Low Quality (Smaller File)';
+    if (mediaType === 'image') {
+      if (quality > 0.8) return 'High Quality (Larger File)';
+      if (quality > 0.5) return 'Medium Quality';
+      return 'Low Quality (Smaller File)';
+    } else {
+      // Video quality descriptions
+      if (quality > 0.8) return 'High Resolution (Larger File)';
+      if (quality > 0.5) return 'Medium Resolution';
+      return 'Low Resolution (Smaller File)';
+    }
+  };
+
+  // Calculate estimated file size impact
+  const getFileSizeImpact = (quality: number): string => {
+    if (quality > 0.8) return 'File size reduction: ~20-30%';
+    if (quality > 0.5) return 'File size reduction: ~40-60%';
+    return 'File size reduction: ~70-80%';
   };
 
   return (
     <SliderContainer>
-      <SliderLabel>{label}</SliderLabel>
+      <SliderLabel>{sliderLabel}</SliderLabel>
 
       <StyledSlider
         minimumValue={minimumValue}
@@ -37,15 +63,22 @@ export const QualitySlider: React.FC<QualitySliderProps> = ({
         step={step}
         value={value}
         onValueChange={onValueChange}
-        minimumTrackTintColor={theme.colors.primary}
+        minimumTrackTintColor={
+          disabled ? theme.colors.disabled : theme.colors.primary
+        }
         maximumTrackTintColor={theme.colors.disabled}
-        thumbTintColor={theme.colors.primary}
+        thumbTintColor={disabled ? theme.colors.disabled : theme.colors.primary}
+        disabled={disabled}
       />
 
       <SliderValueContainer justifySpaceBetween>
-        <SliderValue quality={value}>{(value * 100).toFixed(0)}%</SliderValue>
+        <SliderValue quality={value} disabled={disabled}>
+          {(value * 100).toFixed(0)}%
+        </SliderValue>
         <QualityDescription>{getQualityDescription(value)}</QualityDescription>
       </SliderValueContainer>
+
+      <ImpactText>{getFileSizeImpact(value)}</ImpactText>
     </SliderContainer>
   );
 };
@@ -69,10 +102,11 @@ const SliderValueContainer = styled(Row)`
   margin-top: ${theme.spacing.xs};
 `;
 
-const SliderValue = styled.Text<{ quality: number }>`
+const SliderValue = styled.Text<{ quality: number; disabled?: boolean }>`
   font-size: ${theme.fontSizes.sm};
   font-weight: bold;
-  color: ${({ quality }: { quality: number }) => {
+  color: ${({ quality, disabled }: { quality: number; disabled?: boolean }) => {
+    if (disabled) return theme.colors.textLight;
     if (quality > 0.7) return theme.colors.success;
     if (quality > 0.4) return theme.colors.accent;
     return theme.colors.error;
@@ -82,4 +116,12 @@ const SliderValue = styled.Text<{ quality: number }>`
 const QualityDescription = styled.Text`
   font-size: ${theme.fontSizes.sm};
   color: ${theme.colors.textLight};
+`;
+
+const ImpactText = styled.Text`
+  font-size: ${theme.fontSizes.xs};
+  color: ${theme.colors.textLight};
+  font-style: italic;
+  margin-top: ${theme.spacing.xs};
+  text-align: center;
 `;
