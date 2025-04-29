@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Platform, ScrollView, Alert } from 'react-native';
+import { Platform, ScrollView, Alert, Text } from 'react-native';
 import styled from 'styled-components/native';
 import ImageCropPicker from 'react-native-image-crop-picker';
 
-import { Button, Column, Row, Spacer, Text } from '@/components';
+import { Button, Column, Row, Spacer } from '@/components';
 import { theme } from '@/styles';
 import { useMediaPicker } from '@/hooks';
 import useMediaProcessor from '@/hooks/useMediaProcessor';
