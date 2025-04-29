@@ -5,8 +5,7 @@ import ImageCropPicker from 'react-native-image-crop-picker';
 
 import { Button, Column, Row, Spacer } from '@/components';
 import { theme } from '@/styles';
-import { useMediaPicker } from '@/hooks';
-import useMediaProcessor from '@/hooks/useMediaProcessor';
+import { useMediaPicker, useMediaProcessor } from '@/hooks';
 
 import { MediaPreview, QualitySlider } from './components';
 import { StatsDisplay } from './components/StatsDisplay';

@@ -43,7 +43,6 @@ export interface CapturedMedia {
   size?: number;
 }
 
-// Dimensions for cropping
 export interface CropDimensions {
   offsetX: number;
   offsetY: number;

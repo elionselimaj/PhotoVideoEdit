@@ -1,6 +1,5 @@
 import RNFS from 'react-native-fs';
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
-import { Alert } from 'react-native';
 
 /**
  * Formats file size for display
@@ -70,44 +69,17 @@ const convertMediaType = (mediaType: string): 'photo' | 'video' | 'auto' => {
 export const saveToGallery = async (
   fileUri: string,
   mediaType: 'Photos' | 'Videos' = 'Photos',
-  album?: string,
 ): Promise<boolean> => {
   try {
     const newMediaType = convertMediaType(mediaType);
-    // Save file to media library
-    const savedUri = await CameraRoll.save(fileUri, {
+    await CameraRoll.save(fileUri, {
       type: newMediaType,
     });
-
-    // If album name is provided, try to add to album
-    // Note: @react-native-camera-roll/camera-roll supports albums on both iOS and Android
-    if (album && savedUri) {
-      try {
-        // Get the latest saved asset
-        const fetchParams = { first: 1, assetType: mediaType };
-        const assets = await CameraRoll.getPhotos(fetchParams);
-
-        if (assets.edges.length > 0) {
-          // const assetId = assets.edges[0].node.image.uri;
-
-          // Create the album if it doesn't exist and add the asset
-          await CameraRoll.save(fileUri, {
-            type: newMediaType,
-            album: album,
-          });
-        }
-      } catch (albumError) {
-        console.error('Error adding to album:', albumError);
-        // Continue even if album creation fails - media is still saved
-      }
-    }
-
-    return true;
-  } catch (error) {
-    console.error('Error saving to gallery:', error);
-    Alert.alert('Error', 'Failed to save media to gallery');
-    return false;
+  } catch (albumError) {
+    console.error('Error adding to album:', albumError);
   }
+
+  return true;
 };
 
 /**

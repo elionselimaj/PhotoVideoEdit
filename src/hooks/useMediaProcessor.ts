@@ -1,21 +1,31 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
 
-import {
-  MediaFile,
-  ProcessingOptions,
-  ProcessingStats,
-  ProcessedMedia,
-  CropDimensions,
-} from '@/types';
+import { MediaFile, ProcessedMedia } from '@/types';
 import { processMediaImage, saveToGallery } from '@/utils';
+
+export interface ProcessingOptions {
+  compressionQuality: number;
+  enableCrop: boolean;
+  cropDimensions: {
+    offsetX: number;
+    offsetY: number;
+    width: number;
+    height: number;
+  };
+}
 
 interface MediaProcessorState {
   isProcessing: boolean;
   processedMedia: ProcessedMedia | null;
   processingOptions: ProcessingOptions;
   setCompressionQuality: (quality: number) => void;
-  setCropDimensions: (dimensions: CropDimensions) => void;
+  setCropDimensions: (dimensions: {
+    offsetX: number;
+    offsetY: number;
+    width: number;
+    height: number;
+  }) => void;
   toggleCropMode: () => void;
   processMedia: (mediaFile: MediaFile) => Promise<void>;
   saveToGallery: () => Promise<boolean>;
@@ -35,6 +45,7 @@ export const useMediaProcessor = (): MediaProcessorState => {
     },
   );
 
+  /* Update compression quality */
   const setCompressionQuality = (quality: number): void => {
     setProcessingOptions(prev => ({
       ...prev,
@@ -42,13 +53,20 @@ export const useMediaProcessor = (): MediaProcessorState => {
     }));
   };
 
-  const setCropDimensions = (dimensions: CropDimensions): void => {
+  /*  Set crop dimensions* */
+  const setCropDimensions = (dimensions: {
+    offsetX: number;
+    offsetY: number;
+    width: number;
+    height: number;
+  }): void => {
     setProcessingOptions(prev => ({
       ...prev,
       cropDimensions: dimensions,
     }));
   };
 
+  /*  Toggle crop mode */
   const toggleCropMode = (): void => {
     setProcessingOptions(prev => ({
       ...prev,
@@ -56,42 +74,41 @@ export const useMediaProcessor = (): MediaProcessorState => {
     }));
   };
 
+  /* Process media (image only now) */
   const processMedia = async (mediaFile: MediaFile): Promise<void> => {
     if (!mediaFile || !mediaFile.uri) {
-      Alert.alert('Error', 'Please select media first');
+      Alert.alert('Error', 'Please select an image first');
+      return;
+    }
+
+    if (mediaFile.type !== 'image') {
+      Alert.alert('Error', 'Currently only image processing is supported');
       return;
     }
 
     setIsProcessing(true);
 
     try {
-      let processedUri: string;
-      let stats: ProcessingStats;
+      const cropData = processingOptions.enableCrop
+        ? processingOptions.cropDimensions
+        : undefined;
 
-      if (mediaFile.type === 'image') {
-        const result = await processMediaImage(
-          mediaFile.uri,
-          processingOptions,
-        );
-        processedUri = result.processedUri;
-        stats = result.stats;
-      } else if (mediaFile.type === 'video') {
-        // const result = await processVideo(mediaFile.uri, processingOptions);
-        // processedUri = result.processedUri;
-        // stats = result.stats;
-      } else {
-        throw new Error('Unsupported media type');
-      }
+      console.log('cropData', cropData);
+      const result = await processMediaImage(
+        mediaFile.uri,
+        processingOptions.compressionQuality,
+        cropData,
+      );
 
       setProcessedMedia({
         originalUri: mediaFile.uri,
-        processedUri,
-        stats,
-        type: mediaFile.type,
+        processedUri: result.processedUri,
+        stats: result.stats,
+        type: 'image',
       });
     } catch (error) {
-      console.error('Error processing media:', error);
-      Alert.alert('Error', 'Failed to process media');
+      console.error('Error processing image:', error);
+      Alert.alert('Error', 'Failed to process image');
     } finally {
       setIsProcessing(false);
     }
@@ -99,24 +116,20 @@ export const useMediaProcessor = (): MediaProcessorState => {
 
   const saveToGalleryHandler = async (): Promise<boolean> => {
     if (!processedMedia || !processedMedia.processedUri) {
-      Alert.alert('Error', 'No processed media to save');
+      Alert.alert('Error', 'No processed image to save');
       return false;
     }
 
-    const mediaType = processedMedia.type === 'image' ? 'Photos' : 'Videos';
-    const success = await saveToGallery(
-      processedMedia.processedUri,
-      mediaType,
-      'MediaProcessor',
-    );
+    const success = await saveToGallery(processedMedia.processedUri, 'Photos');
 
     if (success) {
-      Alert.alert('Success', 'Media saved to gallery');
+      Alert.alert('Success', 'Image saved to gallery');
     }
 
     return success;
   };
 
+  /* Reset processed media and options */
   const reset = (): void => {
     setProcessedMedia(null);
     setProcessingOptions({
