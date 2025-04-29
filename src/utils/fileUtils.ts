@@ -53,6 +53,13 @@ export const getFileInfo = async (
   }
 };
 
+const convertMediaType = (mediaType: string): 'photo' | 'video' | 'auto' => {
+  if (mediaType) {
+    return mediaType === 'Photos' ? 'photo' : 'video';
+  }
+  return 'auto';
+};
+
 /**
  * Save a file to the device's media library
  * @param fileUri - URI of the file to save
@@ -62,12 +69,15 @@ export const getFileInfo = async (
  */
 export const saveToGallery = async (
   fileUri: string,
-  mediaType: 'photo' | 'video' = 'photo',
+  mediaType: 'Photos' | 'Videos' = 'Photos',
   album?: string,
 ): Promise<boolean> => {
   try {
+    const newMediaType = convertMediaType(mediaType);
     // Save file to media library
-    const savedUri = await CameraRoll.save(fileUri, { type: mediaType });
+    const savedUri = await CameraRoll.save(fileUri, {
+      type: newMediaType,
+    });
 
     // If album name is provided, try to add to album
     // Note: @react-native-camera-roll/camera-roll supports albums on both iOS and Android
@@ -82,7 +92,7 @@ export const saveToGallery = async (
 
           // Create the album if it doesn't exist and add the asset
           await CameraRoll.save(fileUri, {
-            type: mediaType,
+            type: newMediaType,
             album: album,
           });
         }
@@ -101,16 +111,6 @@ export const saveToGallery = async (
 };
 
 /**
- * Generate a temporary file path in cache directory
- * @param extension - File extension (e.g., "jpg", "mp4")
- * @returns Full path for a temporary file
- */
-export const generateTempFilePath = (extension: string): string => {
-  const timestamp = Date.now();
-  return `${RNFS.CachesDirectoryPath}/temp_${timestamp}.${extension}`;
-};
-
-/**
  * Calculate size reduction percentage
  * @param originalSize - Original size in bytes
  * @param newSize - New size in bytes
@@ -125,18 +125,4 @@ export const calculateReduction = (
     2,
   );
   return `${percentage}%`;
-};
-
-/**
- * Delete a temporary file
- * @param uri - URI of file to delete
- */
-export const deleteTempFile = async (uri: string): Promise<void> => {
-  try {
-    if (await RNFS.exists(uri)) {
-      await RNFS.unlink(uri);
-    }
-  } catch (error) {
-    console.error('Error deleting temp file:', error);
-  }
 };

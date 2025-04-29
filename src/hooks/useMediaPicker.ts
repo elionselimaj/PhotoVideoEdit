@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
-import { launchImageLibrary } from 'react-native-image-picker';
+import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 import { createThumbnail } from 'react-native-create-thumbnail';
-// import { Camera } from 'react-native-vision-camera';
 import { CapturedMedia, MediaFile } from '@/types';
 import usePermissions from '@/hooks/usePermissions';
 
@@ -26,8 +25,9 @@ export const useMediaPicker = (): MediaPickerState => {
   const checkPermissions = async (): Promise<boolean> => {
     if (!allPermissionsGranted) {
       const granted = await requestPermissions();
-      if (!granted) return;
+      return !!granted;
     }
+    return true;
   };
 
   const generateThumbnail = async (
@@ -75,7 +75,14 @@ export const useMediaPicker = (): MediaPickerState => {
   };
 
   const pickFromGallery = async (): Promise<void> => {
-    await checkPermissions();
+    const permissionsGranted = await checkPermissions();
+    if (!permissionsGranted) {
+      Alert.alert(
+        'Permission Required',
+        'Media access permissions are required',
+      );
+      return;
+    }
 
     try {
       const result = await launchImageLibrary({
@@ -100,35 +107,33 @@ export const useMediaPicker = (): MediaPickerState => {
   };
 
   const openCamera = async (): Promise<void> => {
-    await checkPermissions();
+    const permissionsGranted = await checkPermissions();
+    if (!permissionsGranted) {
+      Alert.alert('Permission Required', 'Camera permissions are required');
+      return;
+    }
 
-    // const cameraPermission = await Camera.getCameraPermissionStatus();
-    // const microphonePermission = await Camera.getMicrophonePermissionStatus();
+    try {
+      // Use react-native-image-picker's launchCamera instead of vision-camera
+      const result = await launchCamera({
+        mediaType: 'photo', // We're focusing on images only
+        quality: 1,
+        saveToPhotos: false,
+      });
 
-    // if (cameraPermission !== 'granted') {
-    //   const newCameraPermission = await Camera.requestCameraPermission();
-    //   if (newCameraPermission !== 'granted') {
-    //     Alert.alert(
-    //       'Permission Required',
-    //       'Camera permission is required to capture media',
-    //     );
-    //     return;
-    //   }
-    // }
-    //
-    // if (microphonePermission !== 'granted') {
-    //   const newMicrophonePermission =
-    //     await Camera.requestMicrophonePermission();
-    //   if (newMicrophonePermission !== 'granted') {
-    //     Alert.alert(
-    //       'Permission Required',
-    //       'Microphone permission is required to record video',
-    //     );
-    //     return;
-    //   }
-    // }
-
-    setIsCameraActive(true);
+      if (!result.didCancel && result.assets && result.assets.length > 0) {
+        const asset = result.assets[0];
+        await processPickedMedia(
+          asset.uri || '',
+          'image', // For now, we're only handling images
+          asset.fileName,
+          asset.fileSize,
+        );
+      }
+    } catch (error) {
+      console.error('Error opening camera:', error);
+      Alert.alert('Error', 'Failed to open camera');
+    }
   };
 
   const closeCamera = (): void => {

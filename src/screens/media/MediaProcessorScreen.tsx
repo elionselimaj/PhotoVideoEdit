@@ -1,23 +1,21 @@
 import React, { useState } from 'react';
-import { Button, Column, Row, Spacer, Text } from '@/components';
-import { theme } from '@/styles';
-import styled from 'styled-components/native';
 import { Platform, ScrollView, Alert } from 'react-native';
-import { useMediaPicker } from '@/hooks';
-import { MediaPreview } from './components/MediaPreview';
-import { QualitySlider } from './components/QualitySlider';
-import { StatsDisplay } from './components/StatsDisplay';
-import useMediaProcessor from '@/hooks/useMediaProcessor';
+import styled from 'styled-components/native';
 import ImageCropPicker from 'react-native-image-crop-picker';
 
-// Optional: Import a cropping library if you want to implement cropping
-// import ImageCropper from 'react-native-image-crop-picker';
+import { Button, Column, Row, Spacer, Text } from '@/components';
+import { theme } from '@/styles';
+import { useMediaPicker } from '@/hooks';
+import useMediaProcessor from '@/hooks/useMediaProcessor';
+
+import { MediaPreview, QualitySlider } from './components';
+import { StatsDisplay } from './components/StatsDisplay';
+import { MediaFile } from '@/types';
 
 export const MediaProcessorScreen: React.FC = () => {
-  // State to track if we're in cropping mode
-  const [isCropping, setIsCropping] = useState(false);
+  const [isCropping, setIsCropping] = useState<boolean>(false);
+  const [croppedImage, setCroppedImage] = useState(null);
 
-  // Use your existing media picker hook
   const {
     mediaFile,
     isLoading: isLoadingMedia,
@@ -26,7 +24,6 @@ export const MediaProcessorScreen: React.FC = () => {
     resetMedia,
   } = useMediaPicker();
 
-  // Use the media processor hook we created
   const {
     isProcessing,
     processedMedia,
@@ -39,49 +36,49 @@ export const MediaProcessorScreen: React.FC = () => {
     reset,
   } = useMediaProcessor();
 
-  // Handler for processing the media
   const handleProcess = async () => {
     if (!mediaFile) {
       Alert.alert('Error', 'Please select an image first');
       return;
     }
 
-    // If cropping is enabled, enter cropping mode first
     if (processingOptions.enableCrop && !isCropping) {
-      handleCrop();
+      await handleCrop();
       return;
     }
-
-    // Process the media
-    await processMedia(mediaFile);
+    const imageToProcess = croppedImage || mediaFile;
+    await processMedia(imageToProcess);
   };
 
-  // Handler for cropping (this is an example implementation)
   const handleCrop = async () => {
     if (!mediaFile) return;
 
     setIsCropping(true);
 
     try {
-      // Here you would integrate with a cropping library
-      // For example with react-native-image-crop-picker:
-      const croppedImage = await ImageCropPicker.openCropper({
+      const croppedResult = await ImageCropPicker.openCropper({
+        mediaType: 'photo',
         path: mediaFile.uri,
         width: 300,
         height: 400,
       });
 
-      // Update the crop dimensions
       setCropDimensions({
-        offsetX: croppedImage.cropRect.x,
-        offsetY: croppedImage.cropRect.y,
-        width: croppedImage.cropRect.width,
-        height: croppedImage.cropRect.height,
+        offsetX: croppedResult.cropRect.x,
+        offsetY: croppedResult.cropRect.y,
+        width: croppedResult.cropRect.width,
+        height: croppedResult.cropRect.height,
       });
 
-      // After cropping, resume processing
+      const croppedMediaFile: MediaFile = {
+        uri: croppedResult.path,
+        type: 'image',
+        name: `cropped-${mediaFile.name || 'image'}`,
+        size: croppedResult.size,
+      };
+      setCroppedImage(croppedMediaFile);
       setIsCropping(false);
-      await processMedia(mediaFile);
+      await processMedia(croppedMediaFile);
     } catch (error) {
       console.error('Error during cropping:', error);
       setIsCropping(false);
@@ -89,13 +86,12 @@ export const MediaProcessorScreen: React.FC = () => {
     }
   };
 
-  // Handler for resetting everything
   const handleReset = () => {
+    setCroppedImage(null);
     reset();
     resetMedia();
   };
 
-  // Determine if processing is enabled
   const isProcessingEnabled = mediaFile && !isProcessing && !isCropping;
 
   return (
@@ -103,7 +99,6 @@ export const MediaProcessorScreen: React.FC = () => {
       <Column p={16}>
         <Spacer height={theme.spacing.md} />
 
-        {/* Media Selection Card */}
         <Card>
           <SectionTitle>Select Media</SectionTitle>
           <Row justifySpaceBetween>
@@ -122,12 +117,11 @@ export const MediaProcessorScreen: React.FC = () => {
           </Row>
         </Card>
 
-        {/* Media Processing Options */}
         {mediaFile ? (
           <Card>
             <SectionTitle>Selected Media</SectionTitle>
             <MediaPreview
-              uri={mediaFile.uri}
+              uri={mediaFile?.uri || null}
               type={mediaFile.type}
               thumbnailUri={mediaFile.thumbnailUri}
               isLoading={isLoadingMedia}
@@ -136,14 +130,12 @@ export const MediaProcessorScreen: React.FC = () => {
             <Spacer height={theme.spacing.sm} />
             <SectionTitle>Processing Options</SectionTitle>
 
-            {/* Quality Slider */}
             <QualitySlider
               value={processingOptions.compressionQuality}
               onValueChange={setCompressionQuality}
               disabled={isProcessing || isCropping}
             />
 
-            {/* Crop Toggle Button */}
             <Button
               onPress={toggleCropMode}
               variant={processingOptions.enableCrop ? 'accent' : 'primary'}
@@ -155,12 +147,10 @@ export const MediaProcessorScreen: React.FC = () => {
 
             <Spacer height={theme.spacing.sm} />
 
-            {/* Process Button */}
             <Button
               onPress={handleProcess}
               variant="secondary"
               disabled={!isProcessingEnabled}
-              loading={isProcessing || isCropping}
               fullWidth
             >
               {isCropping
@@ -176,7 +166,6 @@ export const MediaProcessorScreen: React.FC = () => {
           </Card>
         )}
 
-        {/* Results Card */}
         {processedMedia && (
           <Card>
             <SectionTitle>Processed Image</SectionTitle>
@@ -186,10 +175,8 @@ export const MediaProcessorScreen: React.FC = () => {
               showControls={true}
             />
 
-            {/* Display Processing Stats */}
             <StatsDisplay stats={processedMedia.stats} />
 
-            {/* Save & Reset Buttons */}
             <Row justifySpaceBetween>
               <Button
                 onPress={saveToGallery}
@@ -235,7 +222,7 @@ const Card = styled.View`
   })};
 `;
 
-const SectionTitle = styled(Text)`
+const SectionTitle = styled.Text`
   font-size: ${theme.fontSizes.lg};
   font-weight: bold;
   margin-bottom: ${theme.spacing.sm};

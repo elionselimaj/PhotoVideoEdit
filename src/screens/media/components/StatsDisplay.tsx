@@ -12,7 +12,6 @@ export const StatsDisplay: React.FC<StatsDisplayProps> = ({
   stats,
   title = 'Processing Stats',
 }) => {
-  // Extract percentage value from string (e.g., "50.25%" → 50.25)
   const reductionPercentage = parseFloat(
     stats.percentageReduction.replace('%', ''),
   );
@@ -56,7 +55,7 @@ export const StatsDisplay: React.FC<StatsDisplayProps> = ({
           <StatsRow>
             <StatsLabel>Original</StatsLabel>
             <StatsValue>
-              {stats.originalDimensions.width} ×{' '}
+              {stats.originalDimensions.width} ×
               {stats.originalDimensions.height}
             </StatsValue>
           </StatsRow>

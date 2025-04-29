@@ -105,37 +105,3 @@ export const processMediaImage = async (
     throw error;
   }
 };
-
-/**
- * Check if an image needs conversion to JPG
- */
-export const needsJpgConversion = (uri: string): boolean => {
-  const extension = getFileExtension(uri);
-  return extension !== 'jpg' && extension !== 'jpeg';
-};
-
-/**
- * Get image dimensions
- */
-export const getImageDimensions = async (
-  uri: string,
-): Promise<{ width: number; height: number }> => {
-  try {
-    const result = await ImageResizer.createResizedImage(
-      uri,
-      2000, // Just to get info
-      2000, // Just to get info
-      'JPEG',
-      100,
-      0,
-    );
-
-    return {
-      width: result.width,
-      height: result.height,
-    };
-  } catch (error) {
-    console.error('Error getting image dimensions:', error);
-    return { width: 0, height: 0 };
-  }
-};
