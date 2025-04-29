@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>NSCameraUsageDescription</key>
+	<string>PhotoVideoEdit needs camera access to allow users to take or upload photos for their profile and listings.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+    <string>PhotoVideoEdit needs access to your photo library to upload images for profiles and listings, making it easier for users to manage content.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>

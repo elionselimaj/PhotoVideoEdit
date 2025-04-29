@@ -3,7 +3,6 @@ import styled from 'styled-components/native';
 import { TouchableOpacityProps } from 'react-native';
 import { theme } from '@/styles';
 import { PressableVibration } from './TouchableVibration';
-import { Text } from '../other';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'accent';
 export type ButtonSize = 'small' | 'medium' | 'large';
@@ -60,7 +59,7 @@ const StyledButton = styled(PressableVibration)<{
   opacity: ${({ disabled }: { disabled: boolean }) => (disabled ? 0.7 : 1)};
 `;
 
-const ButtonText = styled(Text)<{ size: ButtonSize }>`
+const ButtonText = styled.Text<{ size: ButtonSize }>`
   color: white;
   font-weight: bold;
   font-size: ${({ size }: { size: ButtonSize }) => {
