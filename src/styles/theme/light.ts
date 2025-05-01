@@ -12,6 +12,7 @@ export const lightTheme = {
     success: '#4CAF50',
     info: '#E3F2FD',
     overlay: '#0F121AAA',
+    gray: '#808080',
   },
   spacing: {
     xs: '4px',

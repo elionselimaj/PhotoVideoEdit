@@ -3,12 +3,11 @@ import { Platform, ScrollView, Alert, Text } from 'react-native';
 import styled from 'styled-components/native';
 import ImageCropPicker from 'react-native-image-crop-picker';
 
-import { Button, Column, Row, Spacer } from '@/components';
+import { Button, Column, Loader, Row, Spacer } from '@/components';
 import { theme } from '@/styles';
 import { useMediaPicker, useMediaProcessor } from '@/hooks';
 
-import { MediaPreview, QualitySlider } from './components';
-import { StatsDisplay } from './components/StatsDisplay';
+import { MediaPreview, StatsDisplay, QualitySlider } from './components';
 import { MediaFile } from '@/types';
 
 export const MediaProcessorScreen: React.FC = () => {
@@ -27,9 +26,11 @@ export const MediaProcessorScreen: React.FC = () => {
     isProcessing,
     processedMedia,
     processingOptions,
+    processingProgress,
     setCompressionQuality,
     setCropDimensions,
     toggleCropMode,
+    setVideoMetadata,
     processMedia,
     saveToGallery,
     reset,
@@ -37,20 +38,28 @@ export const MediaProcessorScreen: React.FC = () => {
 
   const handleProcess = async () => {
     if (!mediaFile) {
-      Alert.alert('Error', 'Please select an image first');
+      Alert.alert('Error', 'Please select media first');
       return;
     }
 
-    if (processingOptions.enableCrop && !isCropping) {
+    // For images with crop enabled, handle the crop process
+    if (
+      mediaFile.type === 'image' &&
+      processingOptions.enableCrop &&
+      !isCropping
+    ) {
       await handleCrop();
       return;
     }
-    const imageToProcess = croppedImage || mediaFile;
-    await processMedia(imageToProcess);
+
+    // Process the media (either the original or cropped image)
+    const mediaToProcess =
+      mediaFile.type === 'image' && croppedImage ? croppedImage : mediaFile;
+    await processMedia(mediaToProcess);
   };
 
   const handleCrop = async () => {
-    if (!mediaFile) return;
+    if (!mediaFile || mediaFile.type !== 'image') return;
 
     setIsCropping(true);
 
@@ -129,22 +138,49 @@ export const MediaProcessorScreen: React.FC = () => {
             <Spacer height={theme.spacing.sm} />
             <SectionTitle>Processing Options</SectionTitle>
 
+            {/* Quality slider for both image and video */}
             <QualitySlider
               value={processingOptions.compressionQuality}
               onValueChange={setCompressionQuality}
               disabled={isProcessing || isCropping}
+              mediaType={mediaFile.type}
             />
 
-            <Button
-              onPress={toggleCropMode}
-              variant={processingOptions.enableCrop ? 'accent' : 'primary'}
-              size="small"
-              disabled={isProcessing || isCropping}
-            >
-              {processingOptions.enableCrop ? 'Disable Crop' : 'Enable Crop'}
-            </Button>
+            {/* Image-specific options */}
+            {mediaFile.type === 'image' && (
+              <Button
+                onPress={toggleCropMode}
+                variant={processingOptions.enableCrop ? 'accent' : 'primary'}
+                size="small"
+                disabled={isProcessing || isCropping}
+              >
+                {processingOptions.enableCrop ? 'Disable Crop' : 'Enable Crop'}
+              </Button>
+            )}
+
+            {/* Video-specific options - just info text */}
+            {mediaFile.type === 'video' && (
+              <InfoContainer>
+                <InfoText>
+                  Adjust the quality slider above to control video compression.
+                  Lower values produce smaller files with reduced quality, while
+                  higher values maintain better quality but result in larger
+                  files.
+                </InfoText>
+              </InfoContainer>
+            )}
 
             <Spacer height={theme.spacing.sm} />
+
+            {isProcessing && (
+              <>
+                <Loader />
+                <ProgressText>
+                  {Math.round(processingProgress * 100)}% Processed
+                </ProgressText>
+                <Spacer height={theme.spacing.sm} />
+              </>
+            )}
 
             <Button
               onPress={handleProcess}
@@ -156,18 +192,20 @@ export const MediaProcessorScreen: React.FC = () => {
                 ? 'Cropping...'
                 : isProcessing
                   ? 'Processing...'
-                  : 'Process Image'}
+                  : `Process ${mediaFile.type === 'image' ? 'Image' : 'Video'}`}
             </Button>
           </Card>
         ) : (
           <Card>
-            <Text>Please select or capture an image to get started</Text>
+            <Text>Please select or capture media to get started</Text>
           </Card>
         )}
 
         {processedMedia && (
           <Card>
-            <SectionTitle>Processed Image</SectionTitle>
+            <SectionTitle>
+              Processed {processedMedia.type === 'image' ? 'Image' : 'Video'}
+            </SectionTitle>
             <MediaPreview
               uri={processedMedia.processedUri}
               type={processedMedia.type}
@@ -227,3 +265,24 @@ const SectionTitle = styled.Text`
   margin-bottom: ${theme.spacing.sm};
   color: ${theme.colors.text};
 `;
+
+const ProgressText = styled.Text`
+  text-align: center;
+  color: ${theme.colors.textLight};
+  margin-top: ${theme.spacing.xs};
+  font-size: ${theme.fontSizes.sm};
+`;
+
+const InfoContainer = styled.View`
+  padding: ${theme.spacing.sm};
+  background-color: ${theme.colors.background};
+  border-radius: ${theme.borderRadius.sm};
+  margin-vertical: ${theme.spacing.md};
+`;
+
+const InfoText = styled.Text`
+  font-size: ${theme.fontSizes.sm};
+  color: ${theme.colors.textLight};
+`;
+
+export default MediaProcessorScreen;
