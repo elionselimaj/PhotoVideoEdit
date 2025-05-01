@@ -1,6 +1,7 @@
 import { Video } from 'react-native-compressor';
 import { formatFileSize, getFileInfo, calculateReduction } from './fileUtils';
 import { createThumbnail } from 'react-native-create-thumbnail';
+import { showEditor } from 'react-native-video-trim';
 
 /**
  * Process a video with compression
@@ -17,14 +18,17 @@ export const processMediaVideo = async (
   onProgress?: (progress: number) => void,
 ) => {
   try {
+    // Decode URI to handle URL-encoded characters
+    const decodedUri = decodeURI(videoUri);
+
     // Get original file info
-    const originalInfo = await getFileInfo(videoUri);
+    const originalInfo = await getFileInfo(decodedUri);
     if (!originalInfo) {
       throw new Error('Could not get original video info');
     }
 
     // Get file extension
-    const pathParts = videoUri.split('.');
+    const pathParts = decodedUri.split('.');
     const originalFormat =
       pathParts.length > 1 ? pathParts.pop()?.toLowerCase() || 'mp4' : 'mp4';
 
@@ -39,7 +43,7 @@ export const processMediaVideo = async (
 
     // Process the video using react-native-compressor
     const processedUri = await Video.compress(
-      videoUri,
+      decodedUri,
       {
         compressionMethod,
         maxSize: Math.round(options.quality * 1000), // Scale with quality (in MB)
@@ -84,27 +88,145 @@ export const processMediaVideo = async (
 };
 
 /**
- * Gets video metadata using the video URI
- * Note: This is a simple implementation that focuses on getting duration
+ * Gets video metadata using createThumbnail
  * @param videoUri URI of the video
- * @returns Promise with video duration in seconds
+ * @returns Promise with video duration and dimensions
  */
 export const getVideoMetadata = async (videoUri: string) => {
   try {
-    // Use react-native-create-thumbnail to get metadata
-    const result = await createThumbnail({
-      url: videoUri,
-      timeStamp: 0,
-    });
+    // Decode URI to handle URL-encoded characters
+    const decodedUri = decodeURI(videoUri);
 
-    return {
-      duration: result?.timeStamp || 0,
-      width: result.width || 0,
-      height: result.height || 0,
-    };
+    // Use react-native-create-thumbnail to get metadata
+    try {
+      const result = await createThumbnail({
+        url: decodedUri,
+        timeStamp: 0,
+      });
+
+      return {
+        duration: result?.timeStamp || 0,
+        width: result.width || 0,
+        height: result.height || 0,
+      };
+    } catch (thumbnailError) {
+      console.warn(
+        'Error generating thumbnail, continuing with default values:',
+        thumbnailError,
+      );
+      return { duration: 0, width: 0, height: 0 };
+    }
   } catch (error) {
     console.error('Error getting video metadata:', error);
-    // Return a default value with 0 duration if we can't get metadata
     return { duration: 0, width: 0, height: 0 };
+  }
+};
+
+/**
+ * Trim a video using react-native-video-trim
+ * This opens a native UI for video trimming
+ *
+ * @param videoUri URI of the video to trim
+ * @param options Trimming options
+ * @returns Promise that resolves when trimming is complete
+ */
+export const trimVideoUsingEditor = (
+  videoUri: string,
+  options?: {
+    maxDuration?: number;
+    minDuration?: number;
+    cancelButtonText?: string;
+    saveButtonText?: string;
+    enableCancelDialog?: boolean;
+  },
+): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    // Listen for trim events
+    const { NativeEventEmitter, NativeModules } = require('react-native');
+    const eventEmitter = new NativeEventEmitter(NativeModules.VideoTrim);
+
+    // Set up event listener for when trimming finishes
+    const subscription = eventEmitter.addListener('VideoTrim', event => {
+      if (event.name === 'onFinishTrimming') {
+        // Get the output path from the event
+        const outputPath = event.outputPath;
+
+        // Clean up listener
+        subscription.remove();
+
+        // Resolve with the output path
+        resolve(outputPath);
+      } else if (
+        event.name === 'onCancelTrimming' ||
+        event.name === 'onCancel'
+      ) {
+        // Clean up listener
+        subscription.remove();
+
+        // Reject if user cancels
+        reject(new Error('Video trimming was canceled'));
+      }
+    });
+
+    // Show the editor
+    showEditor(videoUri, options);
+  });
+};
+
+/**
+ * Trim and then compress a video
+ * This will first open the trimming UI, then compress the result
+ */
+export const trimAndCompressVideo = async (
+  videoUri: string,
+  options: {
+    trimOptions?: {
+      maxDuration?: number;
+      minDuration?: number;
+    };
+    quality: number;
+  },
+  onProgress?: (progress: number) => void,
+): Promise<{
+  processedUri: string;
+  stats: any;
+}> => {
+  try {
+    // First show the trimming editor
+    if (onProgress) onProgress(0.1);
+
+    // Wait for user to finish trimming
+    const trimmedVideoUri = await trimVideoUsingEditor(
+      videoUri,
+      options.trimOptions,
+    );
+
+    if (onProgress) onProgress(0.5);
+
+    // Then compress the trimmed video
+    const compressResult = await processMediaVideo(
+      trimmedVideoUri,
+      {
+        quality: options.quality,
+      },
+      compressProgress => {
+        // Map compress progress to 50-95%
+        if (onProgress) onProgress(0.5 + compressProgress * 0.45);
+      },
+    );
+
+    // Report 100% progress
+    if (onProgress) onProgress(1.0);
+
+    return {
+      processedUri: compressResult.processedUri,
+      stats: {
+        ...compressResult.stats,
+        trimApplied: true,
+      },
+    };
+  } catch (error) {
+    console.error('Error trimming and compressing video:', error);
+    throw error;
   }
 };
