@@ -7,10 +7,8 @@ import { processMediaVideo } from '@/utils/videoUtils';
 import { saveToGallery } from '@/utils/fileUtils';
 
 export interface ProcessingOptions {
-  // Common options
   compressionQuality: number;
 
-  // Image-specific options
   enableCrop: boolean;
   cropDimensions: {
     offsetX: number;
@@ -19,7 +17,6 @@ export interface ProcessingOptions {
     height: number;
   };
 
-  // Video-specific options
   currentTime: number;
   duration: number;
 }
@@ -30,13 +27,11 @@ interface MediaProcessorState {
   processingOptions: ProcessingOptions;
   processingProgress: number;
 
-  // Common methods
   setCompressionQuality: (quality: number) => void;
   processMedia: (mediaFile: MediaFile) => Promise<void>;
   saveToGallery: () => Promise<boolean>;
   reset: () => void;
 
-  // Image-specific methods
   setCropDimensions: (dimensions: {
     offsetX: number;
     offsetY: number;
@@ -45,7 +40,6 @@ interface MediaProcessorState {
   }) => void;
   toggleCropMode: () => void;
 
-  // Video metadata methods
   setVideoMetadata: (currentTime: number, duration: number) => void;
 }
 
@@ -58,20 +52,14 @@ export const useMediaProcessor = (): MediaProcessorState => {
 
   const [processingOptions, setProcessingOptions] = useState<ProcessingOptions>(
     {
-      // Common options
       compressionQuality: 0.7,
-
-      // Image-specific options
       enableCrop: false,
       cropDimensions: { offsetX: 0, offsetY: 0, width: 0, height: 0 },
-
-      // Video-specific options
       currentTime: 0,
       duration: 0,
     },
   );
 
-  /* Update compression quality */
   const setCompressionQuality = (quality: number): void => {
     setProcessingOptions(prev => ({
       ...prev,
@@ -120,7 +108,6 @@ export const useMediaProcessor = (): MediaProcessorState => {
     setProcessingProgress(0);
 
     try {
-      // Handle based on media type
       if (mediaFile.type === 'image') {
         const cropData = processingOptions.enableCrop
           ? processingOptions.cropDimensions
@@ -139,7 +126,6 @@ export const useMediaProcessor = (): MediaProcessorState => {
           type: 'image',
         });
       } else if (mediaFile.type === 'video') {
-        // Just compress the video
         const result = await processMediaVideo(
           mediaFile.uri,
           {
@@ -164,7 +150,7 @@ export const useMediaProcessor = (): MediaProcessorState => {
       Alert.alert('Error', `Failed to process ${mediaFile.type}`);
     } finally {
       setIsProcessing(false);
-      setProcessingProgress(1); // Ensure progress shows as complete
+      setProcessingProgress(1);
     }
   };
 

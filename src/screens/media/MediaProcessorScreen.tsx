@@ -39,32 +39,27 @@ export const MediaProcessorScreen: React.FC = () => {
     reset,
   } = useMediaProcessor();
 
-  // Set up listener for video trim events
   useEffect(() => {
     if (Platform.OS === 'ios' || Platform.OS === 'android') {
-      // Only set up if on mobile
       const eventEmitter = new NativeEventEmitter(NativeModules.VideoTrim);
       const subscription = eventEmitter.addListener('VideoTrim', event => {
         console.log('VideoTrim event:', event.name);
 
-        // Handle events
         switch (event.name) {
           case 'onStartTrimming':
             setIsTrimming(true);
             break;
           case 'onFinishTrimming':
             setIsTrimming(false);
-            // Create a MediaFile from the trimmed video
             if (event.outputPath && mediaFile) {
               const trimmedFile: MediaFile = {
                 uri: event.outputPath,
                 type: 'video',
                 name: `trimmed-${mediaFile.name || 'video'}`,
-                size: 0, // Size will be determined when processing
+                size: 0,
               };
               setTrimmedVideo(trimmedFile);
 
-              // Process the trimmed video automatically
               processMedia(trimmedFile).catch(error => {
                 console.error('Error processing trimmed video:', error);
                 Alert.alert('Error', 'Failed to process trimmed video');
@@ -90,7 +85,6 @@ export const MediaProcessorScreen: React.FC = () => {
       return;
     }
 
-    // For images with crop enabled, handle the crop process
     if (
       mediaFile.type === 'image' &&
       processingOptions.enableCrop &&
@@ -100,7 +94,6 @@ export const MediaProcessorScreen: React.FC = () => {
       return;
     }
 
-    // Process the media (either the original or modified)
     const mediaToProcess =
       mediaFile.type === 'image' && croppedImage
         ? croppedImage
@@ -151,14 +144,11 @@ export const MediaProcessorScreen: React.FC = () => {
     if (!mediaFile || mediaFile.type !== 'video') return;
 
     try {
-      // Open the native video trim UI
       const options = {
-        maxDuration: 60, // Optional max duration in seconds
-        minDuration: 1, // Minimum duration in seconds
+        maxDuration: 60,
+        minDuration: 1,
       };
 
-      // Trimming happens in the native UI
-      // The result will be handled by the event listener
       trimVideoUsingEditor(mediaFile.uri, options).catch(error => {
         console.error('Error in video trimming:', error);
         if (error.message !== 'Video trimming was canceled') {
