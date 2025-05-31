@@ -77,9 +77,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.photovideoedit"
+    namespace "com.mobile.app.senior.village"
     defaultConfig {
-        applicationId "com.photovideoedit"
+        applicationId "com.mobile.app.senior.village"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
